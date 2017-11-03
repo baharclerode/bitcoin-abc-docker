@@ -10,7 +10,7 @@ node("docker") {
 		}
 
 		stage("Build Bitcoind ABC") {
-			sh "./autogen"
+			sh "./autogen.sh"
 			sh "./configure --disable-wallet --without-miniupnpc --without-gui"
 			sh "make"
 		}
