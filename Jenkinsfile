@@ -5,7 +5,7 @@ node("docker") {
 	buildEnv.inside {
 
 		stage("Checkout Project") {
-			sh "git clone -n https://github.com/Bitcoin-ABC/bitcoin-abc.git ."
+			sh "[ -d .git ] || git clone -n https://github.com/Bitcoin-ABC/bitcoin-abc.git ."
 			sh "git checkout -f v0.16.0"
 		}
 
