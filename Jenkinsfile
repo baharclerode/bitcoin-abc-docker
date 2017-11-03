@@ -6,7 +6,7 @@ node("docker") {
 
 		stage("Checkout Project") {
 			sh "git clone -n https://github.com/Bitcoin-ABC/bitcoin-abc.git ."
-			sh "git checkout -f v.0.16.0"
+			sh "git checkout -f v0.16.0"
 		}
 
 		stage("Build Bitcoind ABC") {
