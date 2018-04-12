@@ -1,6 +1,6 @@
 node("docker") {
 	
-	def buildEnv = docker.image("docker.dragon.zone:10080/bitcoind-build-env:1.0.8")
+	def buildEnv = docker.image("docker.dragon.zone:10080/baharclerode/bitcoind-build-env:1.0.8")
 
 	buildEnv.inside {
 
