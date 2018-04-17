@@ -11,7 +11,6 @@ node("docker") {
 		}
 
 		stage("Build Bitcoind ABC") {
-			sh "cd bitcoin-abc && make distclean"
 			sh "cd bitcoin-abc && ./autogen.sh"
 			sh "cd bitcoin-abc && ./configure --disable-wallet --without-miniupnpc --without-gui"
 			sh "cd bitcoin-abc && make"
