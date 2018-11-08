@@ -1,7 +1,9 @@
 
-properties(parameters([
-    string(name: "commit", description: "Commit to build")
-]))
+properties([
+    parameters([
+        string(name: "commit", description: "Commit to build")
+    ])
+])
 
 node("docker") {
 
