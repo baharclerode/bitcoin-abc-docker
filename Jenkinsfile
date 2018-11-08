@@ -1,26 +1,27 @@
 node("docker") {
-	
-	def buildEnv = docker.image("docker.dragon.zone:10080/baharclerode/bitcoind-build-env:1.0.8")
 
-	buildEnv.inside {
+    stage("Checkout Project") {
+        checkout scm
+    }
 
-		stage("Checkout Project") {
-                        checkout scm
-                        sh "git submodule init"
-                        sh "git submodule update"
-		}
+    def image
+    def tag
 
-		stage("Build Bitcoind ABC") {
-			sh "cd bitcoin-abc && ./autogen.sh"
-			sh "cd bitcoin-abc && ./configure --disable-wallet --without-miniupnpc --without-gui"
-			sh "cd bitcoin-abc && make"
-                        sh "strip bitcoin-abc/src/bitcoind"
-                        sh "strip bitcoin-abc/src/bitcoin-tx"
-                        sh "strip bitcoin-abc/src/bitcoin-cli"
-		}
-	}
+    stage("Build Docker Image") {
+        def revision = sh(returnStdout: true, script: 'git ls-remote --heads https://github.com/Bitcoin-ABC/bitcoin-abc.git master | cut -f 1').trim()
+        tag = sh(returnStdout: true, script: "git ls-remote --tags https://github.com/Bitcoin-ABC/bitcoin-abc.git | grep \"${revision}\" | cut -f 2 | cut -d / -f 3").trim()
 
-        stage("Build Docker Image") {
-                docker.build("docker.dragon.zone:10080/bitcoin-abc:0.17.0.${env.BUILD_NUMBER}")
+        docker.withRegistry('https://docker.dragon.zone:10080', 'jenkins-nexus') {
+            image = docker.build("\"baharclerode/bitcoin-abc:master-${revision.take(6)}-${env.BUILD_NUMBER}")
         }
+    }
+
+    stage("Push Docker Image") {
+        docker.withRegistry('https://docker.dragon.zone:10081', 'jenkins-nexus') {
+            image.push()
+            if (tag) {
+                image.push(tag + "-${env.BUILD_NUMBER}")
+            }
+        }
+    }
 }
