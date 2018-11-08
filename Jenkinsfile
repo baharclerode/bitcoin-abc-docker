@@ -1,7 +1,7 @@
 
 properties([
     parameters([
-        string(name: "commit", description: "Commit to build")
+        string(name: "commit", description: "Commit to build", default: "")
     ])
 ])
 
@@ -15,19 +15,20 @@ node("docker") {
     def tag
 
     stage("Build Docker Image") {
-        def revision = params.commit ?: sh(returnStdout: true, script: 'git ls-remote --heads https://github.com/Bitcoin-ABC/bitcoin-abc.git master | cut -f 1').trim()
+        def revision = params.commit ?: sh(returnStdout: true, script: "git ls-remote --heads https://github.com/Bitcoin-ABC/bitcoin-abc.git ${env.BRANCH_NAME} | cut -f 1").trim()
         tag = sh(returnStdout: true, script: "git ls-remote --tags https://github.com/Bitcoin-ABC/bitcoin-abc.git | grep \"${revision}\" | cut -f 2 | cut -d / -f 3").trim()
 
         docker.withRegistry('https://docker.dragon.zone:10080', 'jenkins-nexus') {
-            image = docker.build("baharclerode/bitcoin-abc:master-${revision.take(6)}-${env.BUILD_NUMBER}", "--build-arg revision=${revision} .")
+            image = docker.build("baharclerode/bitcoin-abc:${env.BRANCH_NAME}-${env.BUILD_NUMBER}-${revision.take(6)}", "--build-arg revision=${revision} .")
         }
     }
 
     stage("Push Docker Image") {
         docker.withRegistry('https://docker.dragon.zone:10081', 'jenkins-nexus') {
             image.push()
+            image.push(env.BRANCH_NAME)
             if (tag) {
-                image.push(tag + "-${env.BUILD_NUMBER}")
+                image.push(tag)
             }
         }
     }
