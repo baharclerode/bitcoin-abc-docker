@@ -1,7 +1,7 @@
 
 properties([
     parameters([
-        string(name: "commit", description: "Commit to build", default: "")
+        string(name: "commit", description: "Commit to build", defaultValue: "")
     ])
 ])
 
